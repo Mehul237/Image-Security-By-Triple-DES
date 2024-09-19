@@ -141,3 +141,161 @@ if __name__ == "__main__":
 ![Screenshot 2024-09-19 132544](https://github.com/user-attachments/assets/ceab8cc1-c588-4008-8b14-6dec9f73f2dd)
 
 <hr>
+<br>
+<br>
+
+## HTML
+
+```html
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Encryptor/Decryptor</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Image Encryptor/Decryptor</h1>
+        <input type="file" id="imageInput" accept="image/*">
+        <button id="encryptBtn">Encrypt Image</button>
+        <button id="decryptBtn">Decrypt Image</button>
+        
+        <h2>Output</h2>
+        <canvas id="outputCanvas" style="display:none;"></canvas>
+        <img id="outputImage" alt="Output" />
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
+
+```
+
+<br>
+
+## CSS
+
+```css
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    text-align: center;
+}
+
+.container {
+    margin: 20px auto;
+    padding: 20px;
+    border: 2px solid #ccc;
+    background-color: white;
+    border-radius: 8px;
+    width: 400px;
+}
+
+button {
+    margin: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
+    border: none;
+    background-color: #28a745;
+    color: white;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #218838;
+}
+
+img {
+    margin-top: 20px;
+    max-width: 100%;
+}
+
+```
+
+<br>
+
+## JavaScript
+
+```js
+
+document.getElementById('imageInput').addEventListener('change', handleImageUpload);
+document.getElementById('encryptBtn').addEventListener('click', encryptImage);
+document.getElementById('decryptBtn').addEventListener('click', decryptImage);
+
+let uploadedImage = null;
+let encryptedData = null;
+
+function handleImageUpload(event) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        uploadedImage = e.target.result;
+        const img = new Image();
+        img.onload = function() {
+            const canvas = document.getElementById('outputCanvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            document.getElementById('outputImage').src = canvas.toDataURL();
+        }
+        img.src = uploadedImage;
+    }
+    
+    if (file) {
+        reader.readAsDataURL(file);
+    }
+}
+
+function encryptImage() {
+    if (!uploadedImage) return;
+    
+    // Simple encryption: reverse the image data
+    const canvas = document.getElementById('outputCanvas');
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    
+    for (let i = 0; i < imageData.data.length; i += 4) {
+        imageData.data[i] = 255 - imageData.data[i];     // Invert Red
+        imageData.data[i + 1] = 255 - imageData.data[i + 1]; // Invert Green
+        imageData.data[i + 2] = 255 - imageData.data[i + 2]; // Invert Blue
+    }
+    
+    ctx.putImageData(imageData, 0, 0);
+    encryptedData = canvas.toDataURL();
+    document.getElementById('outputImage').src = encryptedData;
+}
+
+function decryptImage() {
+    if (!encryptedData) return;
+
+    const img = new Image();
+    img.onload = function() {
+        const canvas = document.getElementById('outputCanvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        
+        for (let i = 0; i < imageData.data.length; i += 4) {
+            imageData.data[i] = 255 - imageData.data[i];     // Invert Red
+            imageData.data[i + 1] = 255 - imageData.data[i + 1]; // Invert Green
+            imageData.data[i + 2] = 255 - imageData.data[i + 2]; // Invert Blue
+        }
+        
+        ctx.putImageData(imageData, 0, 0);
+        document.getElementById('outputImage').src = canvas.toDataURL();
+    }
+    
+    img.src = encryptedData;
+}
+
+
+```
